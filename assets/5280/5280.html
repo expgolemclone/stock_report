@@ -1,0 +1,1550 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ヨシコン (5280)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@500;600&family=Noto+Serif+JP:wght@500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&display=swap" rel="stylesheet">
+    <style>
+        /* === THEME === */
+        :root {
+            --stage-bg: #11182b;
+            --slide-bg: #1c2644;
+            --navy: #1c2644;
+            --navy-alt: #232f55;
+            --cream: #f0ece3;
+            --cream-alt: #e6e0d4;
+            --text-warm: #e2dcd0;
+            --text-muted-dark: #8a96a8;
+            --text-hint-dark: #4e5a6e;
+            --ink: #1a2030;
+            --text-muted-light: #5a6270;
+            --text-hint-light: #9aa0a8;
+            --gold: #c8a870;
+            --border-dark: #2e3d5c;
+            --border-light: #cac4b4;
+            --font-display: "Source Serif 4", "Noto Serif JP", serif;
+            --font-body: "DM Sans", "Noto Serif JP", sans-serif;
+            --font-mono: "IBM Plex Mono", monospace;
+            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+            --duration-normal: 620ms;
+        }
+
+        /* === RESET === */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* ===========================================
+           FIXED 16:9 STAGE: MANDATORY BASE STYLES
+           Include this ENTIRE file in every presentation.
+           Slides are authored at 1920×1080 and scaled as a whole.
+           =========================================== */
+
+        /* 1. Lock the browser viewport */
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+            background: var(--stage-bg, #000);
+        }
+
+        /* 2. Full-window deck viewport */
+        .deck-viewport {
+            position: fixed;
+            inset: 0;
+            overflow: hidden;
+            background: var(--stage-bg, #000);
+        }
+
+        /* 3. Fixed 16:9 design canvas.
+           JavaScript sets transform: translate(...) scale(...). */
+        .deck-stage {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            transform-origin: 0 0;
+            background: var(--slide-bg, #fff);
+        }
+
+        /* 4. Slides stack inside the fixed stage.
+           Content must be laid out at 1920×1080, not reflowed per device. */
+        .slide {
+            position: absolute;
+            inset: 0;
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            display: block;
+            visibility: hidden;
+            opacity: 0;
+            pointer-events: none;
+            background: var(--slide-bg, #fff);
+        }
+
+        .slide.active,
+        .slide.visible {
+            visibility: visible;
+            opacity: 1;
+            pointer-events: auto;
+            z-index: 1;
+        }
+
+        /* 5. Keep media inside authored slide bounds */
+        img,
+        video,
+        canvas,
+        svg {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        /* 6. Presentation chrome stays outside the slide design system */
+        .deck-controls {
+            position: fixed;
+            left: 50%;
+            bottom: 22px;
+            transform: translateX(-50%);
+            z-index: 1000;
+        }
+
+        /* 7. Print one fixed-size slide per page */
+        @media print {
+            html,
+            body {
+                width: 1920px;
+                height: auto;
+                overflow: visible;
+                background: #fff;
+            }
+
+            .deck-viewport {
+                position: static;
+                overflow: visible;
+                background: #fff;
+            }
+
+            .deck-stage {
+                position: static;
+                width: auto;
+                height: auto;
+                transform: none !important;
+                background: none;
+            }
+
+            .slide {
+                position: relative;
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                pointer-events: auto !important;
+                width: 1920px;
+                height: 1080px;
+                break-after: page;
+                page-break-after: always;
+            }
+
+            .slide:last-child {
+                break-after: auto;
+                page-break-after: auto;
+            }
+
+            .deck-controls {
+                display: none !important;
+            }
+        }
+
+        /* 8. Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.2s !important;
+            }
+        }
+
+        /* === BASE TYPOGRAPHY === */
+        body {
+            color: var(--text-warm);
+            font-family: var(--font-body);
+        }
+
+        h1,
+        h2,
+        h3,
+        blockquote {
+            font-family: var(--font-display);
+            letter-spacing: 0;
+        }
+
+        em,
+        .gold {
+            color: var(--gold);
+            font-style: italic;
+        }
+
+        /* === SLIDE SURFACES === */
+        .slide.dark {
+            --slide-bg: var(--navy);
+            background:
+                linear-gradient(rgba(255, 255, 255, 0.026) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.026) 1px, transparent 1px),
+                var(--navy);
+            background-size: 80px 80px, 80px 80px, auto;
+            color: var(--text-warm);
+        }
+
+        .slide.light {
+            --slide-bg: var(--cream);
+            background:
+                linear-gradient(rgba(26, 32, 48, 0.035) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(26, 32, 48, 0.035) 1px, transparent 1px),
+                var(--cream);
+            background-size: 80px 80px, 80px 80px, auto;
+            color: var(--ink);
+        }
+
+        .slide.split {
+            background: linear-gradient(90deg, var(--navy) 0 42%, var(--cream) 42% 100%);
+            color: var(--ink);
+        }
+
+        /* === CHROME === */
+        .chrome {
+            position: absolute;
+            top: 62px;
+            left: 132px;
+            right: 132px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid currentColor;
+            padding-bottom: 20px;
+            color: inherit;
+            opacity: 0.62;
+            font-family: var(--font-mono);
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+        }
+
+        .light .chrome,
+        .split .chrome {
+            color: var(--text-muted-light);
+        }
+
+        .dark .chrome {
+            color: var(--text-muted-dark);
+        }
+
+        .footer-note {
+            position: absolute;
+            left: 132px;
+            right: 132px;
+            bottom: 58px;
+            border-top: 1px solid currentColor;
+            padding-top: 18px;
+            color: inherit;
+            opacity: 0.54;
+            font-family: var(--font-mono);
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 0.12em;
+        }
+
+        .light .footer-note,
+        .split .footer-note {
+            color: var(--text-muted-light);
+        }
+
+        .dark .footer-note {
+            color: var(--text-muted-dark);
+        }
+
+        /* === ANIMATIONS === */
+        .reveal {
+            opacity: 0;
+            transform: translateY(28px);
+            transition:
+                opacity var(--duration-normal) var(--ease-out-expo),
+                transform var(--duration-normal) var(--ease-out-expo);
+        }
+
+        .reveal-left {
+            opacity: 0;
+            transform: translateX(-44px);
+            transition:
+                opacity var(--duration-normal) var(--ease-out-expo),
+                transform var(--duration-normal) var(--ease-out-expo);
+        }
+
+        .reveal-scale {
+            opacity: 0;
+            transform: scale(0.965);
+            transition:
+                opacity 760ms var(--ease-out-expo),
+                transform 760ms var(--ease-out-expo);
+        }
+
+        .slide.visible .reveal,
+        .slide.visible .reveal-left,
+        .slide.visible .reveal-scale {
+            opacity: 1;
+            transform: none;
+        }
+
+        .d1 { transition-delay: 80ms; }
+        .d2 { transition-delay: 160ms; }
+        .d3 { transition-delay: 240ms; }
+        .d4 { transition-delay: 320ms; }
+        .d5 { transition-delay: 400ms; }
+        .d6 { transition-delay: 480ms; }
+
+        /* === SHARED LAYOUT === */
+        .kicker {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            margin-bottom: 28px;
+            color: var(--gold);
+            font-family: var(--font-mono);
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: 0.16em;
+        }
+
+        .kicker::before {
+            content: "";
+            display: block;
+            width: 48px;
+            height: 1px;
+            background: var(--gold);
+        }
+
+        .section-title {
+            font-size: 72px;
+            font-weight: 700;
+            line-height: 1.15;
+        }
+
+        .copy {
+            font-family: var(--font-body);
+            font-size: 29px;
+            font-weight: 500;
+            line-height: 1.72;
+        }
+
+        .small-copy {
+            font-family: var(--font-body);
+            font-size: 23px;
+            font-weight: 500;
+            line-height: 1.65;
+        }
+
+        .tiny-copy {
+            font-family: var(--font-body);
+            font-size: 20px;
+            font-weight: 500;
+            line-height: 1.48;
+        }
+
+        .muted-dark {
+            color: var(--text-muted-dark);
+        }
+
+        .muted-light {
+            color: var(--text-muted-light);
+        }
+
+        .hairline {
+            width: 100%;
+            height: 1px;
+            margin: 28px 0;
+            background: currentColor;
+            opacity: 0.28;
+        }
+
+        .content {
+            position: absolute;
+            left: 132px;
+            right: 132px;
+            top: 158px;
+            bottom: 112px;
+        }
+
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 52px;
+        }
+
+        .three-col {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 36px;
+        }
+
+        .panel {
+            border-top: 2px solid var(--gold);
+            padding: 32px 0 0;
+        }
+
+        .light .panel,
+        .split .panel {
+            border-bottom: 1px solid var(--border-light);
+            padding-bottom: 30px;
+        }
+
+        .dark .panel {
+            border-bottom: 1px solid var(--border-dark);
+            padding-bottom: 30px;
+        }
+
+        .panel h3 {
+            margin-bottom: 22px;
+            font-size: 38px;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .panel .audience {
+            display: inline-block;
+            margin-bottom: 22px;
+            border: 1px solid var(--gold);
+            padding: 8px 13px;
+            color: var(--gold);
+            font-family: var(--font-mono);
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.11em;
+        }
+
+        ul,
+        ol {
+            list-style: none;
+        }
+
+        li {
+            position: relative;
+            padding-left: 31px;
+        }
+
+        li + li {
+            margin-top: 13px;
+        }
+
+        li::before {
+            content: "";
+            position: absolute;
+            top: 0.82em;
+            left: 0;
+            width: 14px;
+            height: 1px;
+            background: var(--gold);
+        }
+
+        .nested {
+            margin-top: 14px;
+            padding-left: 8px;
+        }
+
+        .nested li {
+            padding-left: 25px;
+        }
+
+        .nested li + li {
+            margin-top: 9px;
+        }
+
+        .nested li::before {
+            width: 8px;
+        }
+
+        /* === TITLE SLIDE === */
+        .title-content {
+            position: absolute;
+            left: 132px;
+            right: 132px;
+            top: 116px;
+            bottom: 95px;
+            display: grid;
+            grid-template-columns: 1.02fr 0.98fr;
+            gap: 76px;
+            align-items: end;
+        }
+
+        .title-block {
+            padding-bottom: 72px;
+        }
+
+        .title-kicker {
+            color: var(--gold);
+            font-family: var(--font-mono);
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: 0.16em;
+        }
+
+        .title-block h1 {
+            margin-top: 38px;
+            font-size: 146px;
+            font-weight: 800;
+            line-height: 0.98;
+        }
+
+        .title-block .price {
+            margin-top: 52px;
+            color: var(--text-muted-dark);
+            font-family: var(--font-body);
+            font-size: 38px;
+            font-weight: 500;
+            line-height: 1.42;
+        }
+
+        .title-index {
+            border-left: 1px solid var(--border-dark);
+            padding-left: 60px;
+            padding-bottom: 82px;
+        }
+
+        .title-index li {
+            padding: 31px 0 31px 44px;
+            border-top: 1px solid var(--border-dark);
+            color: var(--text-warm);
+            font-family: var(--font-display);
+            font-size: 43px;
+            font-weight: 600;
+            line-height: 1.18;
+        }
+
+        .title-index li:last-child {
+            border-bottom: 1px solid var(--border-dark);
+        }
+
+        .title-index li::before {
+            top: 53px;
+            width: 18px;
+            background: var(--gold);
+        }
+
+        .title-mark {
+            position: absolute;
+            right: 132px;
+            top: 80px;
+            color: rgba(200, 168, 112, 0.16);
+            font-family: var(--font-display);
+            font-size: 230px;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        /* === BUSINESS SLIDE === */
+        .business-grid {
+            margin-top: 44px;
+        }
+
+        .business-grid .panel {
+            min-height: 525px;
+        }
+
+        .business-grid .num {
+            color: var(--gold);
+            font-family: var(--font-display);
+            font-size: 74px;
+            font-weight: 700;
+            line-height: 0.9;
+        }
+
+        .business-grid h3 {
+            margin-top: 18px;
+        }
+
+        .business-grid .small-copy {
+            font-size: 24px;
+        }
+
+        /* === STATEMENT SLIDE === */
+        .statement-wrap {
+            position: absolute;
+            left: 132px;
+            right: 132px;
+            top: 150px;
+            bottom: 105px;
+            display: grid;
+            grid-template-columns: 0.92fr 1.08fr;
+            gap: 68px;
+            align-items: center;
+        }
+
+        .statement-head {
+            border-right: 1px solid var(--border-dark);
+            padding-right: 56px;
+        }
+
+        .statement-head h2 {
+            margin-top: 28px;
+            font-size: 86px;
+            font-weight: 700;
+            line-height: 1.08;
+        }
+
+        .statement-copy {
+            color: var(--text-warm);
+            font-family: var(--font-display);
+            font-size: 56px;
+            font-weight: 600;
+            line-height: 1.55;
+        }
+
+        .statement-copy span {
+            color: var(--gold);
+        }
+
+        /* === METRICS SLIDE === */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 1.14fr 0.86fr;
+            gap: 56px;
+            margin-top: 42px;
+        }
+
+        .formula-box {
+            border-top: 2px solid var(--gold);
+            border-bottom: 1px solid var(--border-light);
+            padding: 38px 0 42px;
+        }
+
+        .formula-box .label,
+        .metric-card .label {
+            color: var(--text-muted-light);
+            font-family: var(--font-mono);
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.13em;
+        }
+
+        .formula-box .formula {
+            margin-top: 32px;
+            font-family: var(--font-display);
+            font-size: 45px;
+            font-weight: 600;
+            line-height: 1.28;
+        }
+
+        .formula-box .value {
+            margin-top: 28px;
+            color: var(--gold);
+            font-family: var(--font-display);
+            font-size: 104px;
+            font-weight: 700;
+            line-height: 0.96;
+        }
+
+        .metric-stack {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 26px;
+        }
+
+        .metric-card {
+            min-height: 158px;
+            border-top: 1px solid var(--border-light);
+            padding-top: 24px;
+        }
+
+        .metric-card strong {
+            display: block;
+            margin-top: 16px;
+            color: var(--gold);
+            font-family: var(--font-display);
+            font-size: 56px;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .metric-card span {
+            display: block;
+            margin-top: 14px;
+            color: var(--text-muted-light);
+            font-size: 21px;
+            line-height: 1.42;
+        }
+
+        .metric-wide {
+            grid-column: span 2;
+        }
+
+        /* === INTERVIEW SLIDES === */
+        .interview-grid {
+            display: grid;
+            grid-template-columns: 0.78fr 1.22fr;
+            gap: 64px;
+            margin-top: 46px;
+        }
+
+        .source-box {
+            border-top: 2px solid var(--gold);
+            border-bottom: 1px solid var(--border-dark);
+            padding: 32px 0 34px;
+        }
+
+        .source-box p {
+            color: var(--text-warm);
+            font-family: var(--font-display);
+            font-size: 44px;
+            font-weight: 600;
+            line-height: 1.36;
+        }
+
+        .interview-list {
+            border-top: 1px solid var(--border-dark);
+            padding-top: 32px;
+        }
+
+        .interview-list .copy {
+            font-size: 32px;
+        }
+
+        .decision-line {
+            margin-top: 58px;
+            border-top: 2px solid var(--gold);
+            padding-top: 38px;
+            color: var(--text-warm);
+            font-family: var(--font-display);
+            font-size: 62px;
+            font-weight: 700;
+            line-height: 1.32;
+        }
+
+        /* === QUOTE SLIDE === */
+        .quote-layout {
+            position: absolute;
+            left: 132px;
+            right: 132px;
+            top: 154px;
+            bottom: 112px;
+            display: grid;
+            grid-template-columns: 0.96fr 1.04fr;
+            gap: 66px;
+            align-items: start;
+        }
+
+        .quote-card {
+            border-top: 2px solid var(--gold);
+            border-bottom: 1px solid var(--border-light);
+            padding: 42px 0 46px;
+        }
+
+        .quote-card blockquote {
+            color: var(--ink);
+            font-size: 48px;
+            font-weight: 600;
+            line-height: 1.45;
+        }
+
+        .quote-card cite {
+            display: block;
+            margin-top: 34px;
+            color: var(--text-muted-light);
+            font-family: var(--font-mono);
+            font-size: 17px;
+            font-style: normal;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+        }
+
+        .idea-list {
+            border-top: 1px solid var(--border-light);
+            padding-top: 33px;
+        }
+
+        .idea-list .small-copy {
+            font-size: 25px;
+        }
+
+        /* === SCREENING SLIDE === */
+        .screening-layout {
+            display: grid;
+            grid-template-columns: 0.84fr 1.16fr;
+            gap: 48px;
+            margin-top: 42px;
+        }
+
+        .condition-box {
+            border-top: 2px solid var(--gold);
+            padding-top: 34px;
+        }
+
+        .condition-box .copy {
+            font-size: 32px;
+        }
+
+        .condition-box .small-copy {
+            margin-top: 34px;
+            border-top: 1px solid var(--border-dark);
+            padding-top: 28px;
+            color: var(--text-muted-dark);
+            font-size: 24px;
+        }
+
+        .mini-table {
+            border-collapse: collapse;
+            width: 100%;
+            color: var(--text-warm);
+            font-family: var(--font-body);
+        }
+
+        .mini-table th {
+            border-top: 1px solid var(--border-dark);
+            border-bottom: 1px solid var(--border-dark);
+            padding: 16px 12px;
+            color: var(--gold);
+            font-family: var(--font-mono);
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-align: right;
+        }
+
+        .mini-table th:nth-child(2),
+        .mini-table th:nth-child(3) {
+            text-align: left;
+        }
+
+        .mini-table td {
+            border-bottom: 1px solid rgba(46, 61, 92, 0.72);
+            padding: 17px 10px;
+            font-size: 19px;
+            font-weight: 500;
+            line-height: 1.36;
+            text-align: right;
+            vertical-align: top;
+        }
+
+        .mini-table td:nth-child(1) {
+            color: var(--gold);
+            font-family: var(--font-mono);
+            font-size: 17px;
+            font-weight: 600;
+        }
+
+        .mini-table td:nth-child(2),
+        .mini-table td:nth-child(3) {
+            text-align: left;
+        }
+
+        .mini-table td:nth-child(3) {
+            width: 390px;
+            color: var(--text-muted-dark);
+        }
+
+        /* === TABLE SLIDE === */
+        .full-table-wrap {
+            margin-top: 34px;
+        }
+
+        .full-table {
+            border-collapse: collapse;
+            width: 100%;
+            color: var(--ink);
+            font-family: var(--font-body);
+        }
+
+        .full-table th {
+            border-top: 1px solid var(--border-light);
+            border-bottom: 1px solid var(--border-light);
+            padding: 17px 12px;
+            color: var(--gold);
+            font-family: var(--font-mono);
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-align: right;
+        }
+
+        .full-table th:nth-child(2),
+        .full-table th:nth-child(3) {
+            text-align: left;
+        }
+
+        .full-table td {
+            border-bottom: 1px solid rgba(202, 196, 180, 0.86);
+            padding: 22px 12px;
+            font-size: 23px;
+            font-weight: 500;
+            line-height: 1.42;
+            text-align: right;
+            vertical-align: top;
+        }
+
+        .full-table td:nth-child(1) {
+            color: var(--gold);
+            font-family: var(--font-mono);
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .full-table td:nth-child(2) {
+            width: 190px;
+            font-weight: 700;
+            text-align: left;
+        }
+
+        .full-table td:nth-child(3) {
+            width: 680px;
+            color: var(--text-muted-light);
+            text-align: left;
+        }
+
+        /* === PROGRESS AND CONTROLS === */
+        .deck-controls {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            border: 1px solid rgba(200, 168, 112, 0.5);
+            background: rgba(17, 24, 43, 0.76);
+            padding: 9px 14px;
+            color: var(--text-warm);
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            backdrop-filter: blur(10px);
+        }
+
+        .control-button {
+            width: 32px;
+            height: 28px;
+            border: 0;
+            background: transparent;
+            color: var(--gold);
+            cursor: pointer;
+            font-family: var(--font-mono);
+            font-size: 18px;
+            line-height: 1;
+        }
+
+        .progress-track {
+            width: 104px;
+            height: 2px;
+            background: rgba(226, 220, 208, 0.26);
+        }
+
+        .progress-bar {
+            width: 0;
+            height: 100%;
+            background: var(--gold);
+            transition: width 260ms ease;
+        }
+
+        /* === INLINE EDITING === */
+        .edit-hotzone {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 10000;
+            width: 82px;
+            height: 82px;
+            cursor: pointer;
+        }
+
+        .edit-toggle {
+            position: fixed;
+            top: 18px;
+            left: 18px;
+            z-index: 10001;
+            width: 42px;
+            height: 42px;
+            border: 1px solid rgba(200, 168, 112, 0.7);
+            background: rgba(17, 24, 43, 0.82);
+            color: var(--gold);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            cursor: pointer;
+            font-family: var(--font-mono);
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .edit-toggle.show,
+        .edit-toggle.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .editing .editable {
+            outline: 1px dashed rgba(200, 168, 112, 0.72);
+            outline-offset: 4px;
+        }
+
+        .save-toast {
+            position: fixed;
+            top: 20px;
+            left: 74px;
+            z-index: 10001;
+            border: 1px solid rgba(200, 168, 112, 0.55);
+            background: rgba(17, 24, 43, 0.86);
+            padding: 12px 16px;
+            color: var(--text-warm);
+            opacity: 0;
+            transform: translateY(-8px);
+            transition: opacity 240ms ease, transform 240ms ease;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            pointer-events: none;
+        }
+
+        .save-toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="deck-viewport">
+        <main class="deck-stage" id="deckStage">
+            <section class="slide dark active">
+                <div class="title-mark">5280</div>
+                <div class="title-content">
+                    <div class="title-block">
+                        <div class="title-kicker reveal editable" data-edit-id="s1-kicker"># ヨシコン (5280)</div>
+                        <h1 class="reveal d1 editable" data-edit-id="s1-title">ヨシコン<br>(5280)</h1>
+                        <p class="price reveal d2 editable" data-edit-id="s1-price">前提株価:2152円</p>
+                    </div>
+                    <ol class="title-index reveal d3">
+                        <li class="editable" data-edit-id="s1-index-1">事業内容</li>
+                        <li class="editable" data-edit-id="s1-index-2">指標</li>
+                        <li class="editable" data-edit-id="s1-index-3">周辺情報利用法</li>
+                        <li class="editable" data-edit-id="s1-index-4">新たな投資アイデア</li>
+                    </ol>
+                </div>
+                <div class="footer-note editable" data-edit-id="s1-footer">5280 / ヨシコン</div>
+            </section>
+
+            <section class="slide light">
+                <div class="chrome"><span>事業内容</span><span>02 / 09</span></div>
+                <div class="content">
+                    <div class="kicker reveal editable" data-edit-id="s2-kicker">## 事業内容</div>
+                    <h2 class="section-title reveal d1 editable" data-edit-id="s2-title">事業内容</h2>
+                    <div class="three-col business-grid">
+                        <article class="panel reveal d2">
+                            <div class="num">1</div>
+                            <h3 class="editable" data-edit-id="s2-h3-1">レジデンス事業</h3>
+                            <span class="audience editable" data-edit-id="s2-audience-1">個人向け</span>
+                            <ul class="small-copy">
+                                <li class="editable" data-edit-id="s2-list-1-1">新規分譲マンションの提供</li>
+                                <li class="editable" data-edit-id="s2-list-1-2">用地の取得</li>
+                            </ul>
+                        </article>
+                        <article class="panel reveal d3">
+                            <div class="num">2</div>
+                            <h3 class="editable" data-edit-id="s2-h3-2">不動産開発事業</h3>
+                            <span class="audience editable" data-edit-id="s2-audience-2">企業向け</span>
+                            <ul class="small-copy">
+                                <li class="editable" data-edit-id="s2-list-2-1">開発不動産物件の確保</li>
+                                <li class="editable" data-edit-id="s2-list-2-2">開発</li>
+                                <li class="editable" data-edit-id="s2-list-2-3">販売</li>
+                                <li class="editable" data-edit-id="s2-list-2-4">不動産証券化事業</li>
+                            </ul>
+                        </article>
+                        <article class="panel reveal d4">
+                            <div class="num">3</div>
+                            <h3 class="editable" data-edit-id="s2-h3-3">賃貸・管理等事業</h3>
+                            <span class="audience editable" data-edit-id="s2-audience-3">ゼネコン（YCK）</span>
+                            <ul class="small-copy">
+                                <li class="editable" data-edit-id="s2-list-3-1">設計工事</li>
+                                <li class="editable" data-edit-id="s2-list-3-2">賃貸</li>
+                                <li class="editable" data-edit-id="s2-list-3-3">中古マンションの販売</li>
+                            </ul>
+                        </article>
+                    </div>
+                </div>
+                <div class="footer-note editable" data-edit-id="s2-footer">東海道リート投資法人（2989）</div>
+            </section>
+
+            <section class="slide dark">
+                <div class="chrome"><span>事業内容</span><span>03 / 09</span></div>
+                <div class="statement-wrap">
+                    <div class="statement-head">
+                        <div class="kicker reveal editable" data-edit-id="s3-kicker">## 事業内容</div>
+                        <h2 class="reveal d1 editable" data-edit-id="s3-title">事業内容</h2>
+                    </div>
+                    <p class="statement-copy reveal d2 editable" data-edit-id="s3-copy">東京エリアへマーケット拡大。不動産証券化で資金効率高。不動産業界の中では好財務。連続増配にこだわる。用地取得から建設,売却までの垂直統合により, コスト競争力に強み.静岡県での工場誘致など産業用途での競合少ない. 2027大型案件予定.</p>
+                </div>
+                <div class="footer-note editable" data-edit-id="s3-footer">5280 / ヨシコン</div>
+            </section>
+
+            <section class="slide light">
+                <div class="chrome"><span>指標</span><span>04 / 09</span></div>
+                <div class="content">
+                    <div class="kicker reveal editable" data-edit-id="s4-kicker">## 指標</div>
+                    <h2 class="section-title reveal d1 editable" data-edit-id="s4-title">指標</h2>
+                    <div class="metrics-grid">
+                        <div class="formula-box reveal d2">
+                            <div class="label editable" data-edit-id="s4-label-1">前提株価:2152円</div>
+                            <div class="formula editable" data-edit-id="s4-formula">(流動資産-負債-棚卸資産+有価証券x0.7)/時価総額</div>
+                            <div class="value editable" data-edit-id="s4-value">=-0.51</div>
+                            <p class="small-copy muted-light editable" data-edit-id="s4-fcf">過去10期の平均FCF/時価総額=-1.01%</p>
+                        </div>
+                        <div class="metric-stack reveal d3">
+                            <div class="metric-card metric-wide">
+                                <div class="label editable" data-edit-id="s4-label-2">per</div>
+                                <strong class="editable" data-edit-id="s4-per-main">5.7倍</strong>
+                                <span class="editable" data-edit-id="s4-per-sub">perは実績:5.7倍, 四季報予想 今期:5.4倍, 来期:4.9倍.</span>
+                            </div>
+                            <div class="metric-card">
+                                <div class="label editable" data-edit-id="s4-label-3">PBR</div>
+                                <strong class="editable" data-edit-id="s4-pbr">0.62倍</strong>
+                                <span class="editable" data-edit-id="s4-pbr-text">PBRは0.62倍.</span>
+                            </div>
+                            <div class="metric-card">
+                                <div class="label editable" data-edit-id="s4-label-4">自己資本比率</div>
+                                <strong class="editable" data-edit-id="s4-equity">61.6%</strong>
+                                <span class="editable" data-edit-id="s4-yield">自己資本比率は61.6%, 配当利回りは, 3.72%.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-note editable" data-edit-id="s4-footer">5280 / ヨシコン</div>
+            </section>
+
+            <section class="slide dark">
+                <div class="chrome"><span>周辺情報利用法</span><span>05 / 09</span></div>
+                <div class="content">
+                    <div class="kicker reveal editable" data-edit-id="s5-kicker">## 周辺情報利用法</div>
+                    <h2 class="section-title reveal d1 editable" data-edit-id="s5-title">周辺情報利用法</h2>
+                    <div class="interview-grid">
+                        <div class="source-box reveal d2">
+                            <p class="editable" data-edit-id="s5-source">穴吹工務店, 住友林業, ヨシコン にインタビューを行った.</p>
+                        </div>
+                        <div class="interview-list reveal d3">
+                            <h3 class="editable" data-edit-id="s5-h3">現在の不動産市況</h3>
+                            <ul class="copy">
+                                <li class="editable" data-edit-id="s5-li-1">用地の取得がボトルネック.</li>
+                                <li class="editable" data-edit-id="s5-li-2">ここ数年で不動産価格が高騰しており, 割安な土地はもう無い.</li>
+                                <li class="editable" data-edit-id="s5-li-3">地主にアポを取って交渉をするが, 値段で決まってしまうことが多く優位性は出しづらい.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-note editable" data-edit-id="s5-footer">5280 / ヨシコン</div>
+            </section>
+
+            <section class="slide dark">
+                <div class="chrome"><span>周辺情報利用法</span><span>06 / 09</span></div>
+                <div class="content">
+                    <div class="kicker reveal editable" data-edit-id="s6-kicker">## 周辺情報利用法</div>
+                    <h2 class="section-title reveal d1 editable" data-edit-id="s6-title">イラン戦争</h2>
+                    <div class="two-col">
+                        <div class="interview-list reveal d2">
+                            <ul class="copy">
+                                <li class="editable" data-edit-id="s6-li-1">バスタブが日本に入ってこない.</li>
+                                <li class="editable" data-edit-id="s6-li-2">工期を遅らせて値下がりを待つか, 高値の在庫を買うかの2択.</li>
+                            </ul>
+                            <ul class="small-copy nested muted-dark">
+                                <li class="editable" data-edit-id="s6-nested-1">ヨシコンは今のところ遅らせる方針.</li>
+                                <li class="editable" data-edit-id="s6-nested-2">大きな収益源となる菊川の1棟売りの物件は, 発注済みのため工期は遅れない.</li>
+                            </ul>
+                        </div>
+                        <div class="decision-line reveal d3 editable" data-edit-id="s6-decision">よって, ヨシコンは買える銘柄ではなさそう.</div>
+                    </div>
+                </div>
+                <div class="footer-note editable" data-edit-id="s6-footer">5280 / ヨシコン</div>
+            </section>
+
+            <section class="slide light">
+                <div class="chrome"><span>新たな投資アイデア</span><span>07 / 09</span></div>
+                <div class="quote-layout">
+                    <div>
+                        <div class="kicker reveal editable" data-edit-id="s7-kicker">## 新たな投資アイデア</div>
+                        <h2 class="section-title reveal d1 editable" data-edit-id="s7-title">ポイント11</h2>
+                        <div class="quote-card reveal d2">
+                            <blockquote class="editable" data-edit-id="s7-quote">その会社には同業他社よりも優れている可能性を示唆する業界特有の要素があるか?</blockquote>
+                            <cite class="editable" data-edit-id="s7-cite">フィリップ・フィッシャー</cite>
+                        </div>
+                    </div>
+                    <div class="idea-list reveal d3">
+                        <ul class="small-copy">
+                            <li class="editable" data-edit-id="s7-li-1">悪条件の土地を上手く利用して, 付加価値をつけて高値で売る.</li>
+                            <li class="editable" data-edit-id="s7-li-2">これが不動産デベにおいての, "要素" とのこと.</li>
+                            <li class="editable" data-edit-id="s7-li-3">具体的には</li>
+                        </ul>
+                        <ul class="small-copy nested">
+                            <li class="editable" data-edit-id="s7-nested-1">フージャースHD(3284)が該当するとのこと.</li>
+                            <li class="editable" data-edit-id="s7-nested-2">大阪の立地はいいのに池になっていて他社が手を出せなかった土地を, 埋め立てて商業施設を建てて高値で売却.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="footer-note editable" data-edit-id="s7-footer">5280 / ヨシコン</div>
+            </section>
+
+            <section class="slide dark">
+                <div class="chrome"><span>新たな投資アイデア</span><span>08 / 09</span></div>
+                <div class="content">
+                    <div class="kicker reveal editable" data-edit-id="s8-kicker">### 土地や建材の高騰</div>
+                    <h2 class="section-title reveal d1 editable" data-edit-id="s8-title">土地や建材の高騰</h2>
+                    <div class="screening-layout">
+                        <div class="condition-box reveal d2">
+                            <p class="copy editable" data-edit-id="s8-copy-1">ncrが-1.91でバリュー株とは言えないため, 私の投資対象ではなかった.<br>他の不動産関連企業を探す時にこの"要素"は注目したい.</p>
+                            <p class="small-copy editable" data-edit-id="s8-copy-2">既存物件を持っている会社や, リフォーム業者に妙味ありか?</p>
+                            <p class="small-copy editable" data-edit-id="s8-copy-3">スクリーニング条件は net_cash_ratio &gt;= 0.7、0 &lt; PER &lt; 100、自己資本比率 &gt; 50%、10年平均FCF利回り &gt;= 5%</p>
+                        </div>
+                        <table class="mini-table reveal d3">
+                            <thead>
+                                <tr>
+                                    <th>code</th>
+                                    <th>銘柄</th>
+                                    <th>見立て</th>
+                                    <th>ncr</th>
+                                    <th>FCF%</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="editable" data-edit-id="s8-code-1">9872</td>
+                                    <td class="editable" data-edit-id="s8-name-1">北恵</td>
+                                    <td class="editable" data-edit-id="s8-view-1">住宅資材・住宅設備の商社。内外装材・設備機器・床材などで中古住宅リフォームに近い</td>
+                                    <td class="editable" data-edit-id="s8-ncr-1">1.03</td>
+                                    <td class="editable" data-edit-id="s8-fcf-1">6.71</td>
+                                </tr>
+                                <tr>
+                                    <td class="editable" data-edit-id="s8-code-2">5956</td>
+                                    <td class="editable" data-edit-id="s8-name-2">トーソー</td>
+                                    <td class="editable" data-edit-id="s8-view-2">カーテンレール・ブラインド等のインテリア製品。内装更新需要</td>
+                                    <td class="editable" data-edit-id="s8-ncr-2">1.01</td>
+                                    <td class="editable" data-edit-id="s8-fcf-2">7.65</td>
+                                </tr>
+                                <tr>
+                                    <td class="editable" data-edit-id="s8-code-3">7871</td>
+                                    <td class="editable" data-edit-id="s8-name-3">フクビ化学工業</td>
+                                    <td class="editable" data-edit-id="s8-view-3">新築・リフォーム用建築資材、住宅建材。テーマ適合度高め</td>
+                                    <td class="editable" data-edit-id="s8-ncr-3">1.00</td>
+                                    <td class="editable" data-edit-id="s8-fcf-3">6.16</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="footer-note editable" data-edit-id="s8-footer">5280 / ヨシコン</div>
+            </section>
+
+            <section class="slide light">
+                <div class="chrome"><span>土地や建材の高騰</span><span>09 / 09</span></div>
+                <div class="content">
+                    <div class="kicker reveal editable" data-edit-id="s9-kicker">### 土地や建材の高騰</div>
+                    <h2 class="section-title reveal d1 editable" data-edit-id="s9-title">土地や建材の高騰</h2>
+                    <div class="full-table-wrap reveal d2">
+                        <table class="full-table">
+                            <thead>
+                                <tr>
+                                    <th>code</th>
+                                    <th>銘柄</th>
+                                    <th>見立て</th>
+                                    <th>ncr</th>
+                                    <th>FCF%</th>
+                                    <th>自己資本%</th>
+                                    <th>PER</th>
+                                    <th>PBR</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="editable" data-edit-id="s9-code-1">9872</td>
+                                    <td class="editable" data-edit-id="s9-name-1">北恵</td>
+                                    <td class="editable" data-edit-id="s9-view-1">住宅資材・住宅設備の商社。内外装材・設備機器・床材などで中古住宅リフォームに近い</td>
+                                    <td class="editable" data-edit-id="s9-ncr-1">1.03</td>
+                                    <td class="editable" data-edit-id="s9-fcf-1">6.71</td>
+                                    <td class="editable" data-edit-id="s9-equity-1">50.0</td>
+                                    <td class="editable" data-edit-id="s9-per-1">15.7</td>
+                                    <td class="editable" data-edit-id="s9-pbr-1">0.62</td>
+                                </tr>
+                                <tr>
+                                    <td class="editable" data-edit-id="s9-code-2">5956</td>
+                                    <td class="editable" data-edit-id="s9-name-2">トーソー</td>
+                                    <td class="editable" data-edit-id="s9-view-2">カーテンレール・ブラインド等のインテリア製品。内装更新需要</td>
+                                    <td class="editable" data-edit-id="s9-ncr-2">1.01</td>
+                                    <td class="editable" data-edit-id="s9-fcf-2">7.65</td>
+                                    <td class="editable" data-edit-id="s9-equity-2">60.5</td>
+                                    <td class="editable" data-edit-id="s9-per-2">12.5</td>
+                                    <td class="editable" data-edit-id="s9-pbr-2">0.38</td>
+                                </tr>
+                                <tr>
+                                    <td class="editable" data-edit-id="s9-code-3">7871</td>
+                                    <td class="editable" data-edit-id="s9-name-3">フクビ化学工業</td>
+                                    <td class="editable" data-edit-id="s9-view-3">新築・リフォーム用建築資材、住宅建材。テーマ適合度高め</td>
+                                    <td class="editable" data-edit-id="s9-ncr-3">1.00</td>
+                                    <td class="editable" data-edit-id="s9-fcf-3">6.16</td>
+                                    <td class="editable" data-edit-id="s9-equity-3">63.1</td>
+                                    <td class="editable" data-edit-id="s9-per-3">12.5</td>
+                                    <td class="editable" data-edit-id="s9-pbr-3">0.48</td>
+                                </tr>
+                                <tr>
+                                    <td class="editable" data-edit-id="s9-code-4">4224</td>
+                                    <td class="editable" data-edit-id="s9-name-4">ロンシール工業</td>
+                                    <td class="editable" data-edit-id="s9-view-4">床材・壁装材・建築防水。マンション共用部や既存建物改修に近い</td>
+                                    <td class="editable" data-edit-id="s9-ncr-4">0.86</td>
+                                    <td class="editable" data-edit-id="s9-fcf-4">9.38</td>
+                                    <td class="editable" data-edit-id="s9-equity-4">69.4</td>
+                                    <td class="editable" data-edit-id="s9-per-4">10.7</td>
+                                    <td class="editable" data-edit-id="s9-pbr-4">0.49</td>
+                                </tr>
+                                <tr>
+                                    <td class="editable" data-edit-id="s9-code-5">5958</td>
+                                    <td class="editable" data-edit-id="s9-name-5">三洋工業</td>
+                                    <td class="editable" data-edit-id="s9-view-5">金属建材、内外装材、工事請負。リフォーム専業ではないが建物更新需要</td>
+                                    <td class="editable" data-edit-id="s9-ncr-5">0.78</td>
+                                    <td class="editable" data-edit-id="s9-fcf-5">7.93</td>
+                                    <td class="editable" data-edit-id="s9-equity-5">67.9</td>
+                                    <td class="editable" data-edit-id="s9-per-5">11.9</td>
+                                    <td class="editable" data-edit-id="s9-pbr-5">0.60</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="footer-note editable" data-edit-id="s9-footer">5280 / ヨシコン</div>
+            </section>
+        </main>
+    </div>
+
+    <div class="deck-controls" aria-label="slide controls">
+        <button class="control-button" id="prevButton" title="Previous slide">‹</button>
+        <span id="slideCounter">01 / 09</span>
+        <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
+        <button class="control-button" id="nextButton" title="Next slide">›</button>
+    </div>
+    <div class="edit-hotzone" title="Edit mode"></div>
+    <button class="edit-toggle" id="editToggle" title="Edit mode (E)">E</button>
+    <div class="save-toast" id="saveToast">SAVED</div>
+
+    <script>
+        /* === SLIDE PRESENTATION CONTROLLER === */
+        class SlidePresentation {
+            constructor() {
+                this.slides = Array.from(document.querySelectorAll(".slide"));
+                this.currentSlide = 0;
+                this.stage = document.getElementById("deckStage");
+                this.counter = document.getElementById("slideCounter");
+                this.progress = document.getElementById("progressBar");
+                this.wheelLock = false;
+                this.touchStartX = 0;
+                this.touchStartY = 0;
+                this.setupStageScale();
+                this.setupKeyboardNav();
+                this.setupTouchNav();
+                this.setupWheelNav();
+                this.setupButtons();
+                window.addEventListener("hashchange", () => this.showSlide(this.indexFromHash(), false));
+                this.showSlide(this.indexFromHash(), false);
+            }
+
+            setupStageScale() {
+                const scale = () => {
+                    const factor = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+                    const x = (window.innerWidth - 1920 * factor) / 2;
+                    const y = (window.innerHeight - 1080 * factor) / 2;
+                    this.stage.style.transform = `translate(${x}px, ${y}px) scale(${factor})`;
+                };
+                scale();
+                window.addEventListener("resize", scale);
+            }
+
+            setupKeyboardNav() {
+                document.addEventListener("keydown", (event) => {
+                    if (event.target && event.target.getAttribute("contenteditable") === "true") {
+                        return;
+                    }
+                    if (["ArrowRight", "ArrowDown", " ", "PageDown"].includes(event.key)) {
+                        event.preventDefault();
+                        this.next();
+                    }
+                    if (["ArrowLeft", "ArrowUp", "PageUp"].includes(event.key)) {
+                        event.preventDefault();
+                        this.previous();
+                    }
+                    if (event.key === "Home") {
+                        event.preventDefault();
+                        this.showSlide(0);
+                    }
+                    if (event.key === "End") {
+                        event.preventDefault();
+                        this.showSlide(this.slides.length - 1);
+                    }
+                });
+            }
+
+            setupTouchNav() {
+                window.addEventListener("touchstart", (event) => {
+                    this.touchStartX = event.changedTouches[0].clientX;
+                    this.touchStartY = event.changedTouches[0].clientY;
+                }, { passive: true });
+
+                window.addEventListener("touchend", (event) => {
+                    const dx = event.changedTouches[0].clientX - this.touchStartX;
+                    const dy = event.changedTouches[0].clientY - this.touchStartY;
+                    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 48) {
+                        dx < 0 ? this.next() : this.previous();
+                    }
+                }, { passive: true });
+            }
+
+            setupWheelNav() {
+                window.addEventListener("wheel", (event) => {
+                    if (this.wheelLock || Math.abs(event.deltaY) < 40) return;
+                    this.wheelLock = true;
+                    event.deltaY > 0 ? this.next() : this.previous();
+                    setTimeout(() => {
+                        this.wheelLock = false;
+                    }, 520);
+                }, { passive: true });
+            }
+
+            setupButtons() {
+                document.getElementById("prevButton").addEventListener("click", () => this.previous());
+                document.getElementById("nextButton").addEventListener("click", () => this.next());
+            }
+
+            indexFromHash() {
+                const raw = window.location.hash.replace("#", "");
+                const parsed = Number.parseInt(raw, 10);
+                return Number.isFinite(parsed) ? parsed - 1 : 0;
+            }
+
+            showSlide(index, updateHash = true) {
+                this.currentSlide = Math.max(0, Math.min(index, this.slides.length - 1));
+                this.slides.forEach((slide, slideIndex) => {
+                    const isVisible = slideIndex === this.currentSlide;
+                    slide.classList.toggle("active", isVisible);
+                    slide.classList.toggle("visible", isVisible);
+                });
+                const current = String(this.currentSlide + 1).padStart(2, "0");
+                const total = String(this.slides.length).padStart(2, "0");
+                this.counter.textContent = `${current} / ${total}`;
+                this.progress.style.width = `${((this.currentSlide + 1) / this.slides.length) * 100}%`;
+                if (updateHash) {
+                    history.replaceState(null, "", `#${this.currentSlide + 1}`);
+                }
+            }
+
+            next() {
+                this.showSlide(this.currentSlide + 1);
+            }
+
+            previous() {
+                this.showSlide(this.currentSlide - 1);
+            }
+        }
+
+        /* === INLINE EDITOR === */
+        class InlineEditor {
+            constructor() {
+                this.storageKey = `frontend-slides:${location.pathname}:5280`;
+                this.isActive = false;
+                this.editables = Array.from(document.querySelectorAll(".editable"));
+                this.toggle = document.getElementById("editToggle");
+                this.toast = document.getElementById("saveToast");
+                this.restore();
+                this.setupControls();
+            }
+
+            setupControls() {
+                this.toggle.addEventListener("click", () => this.toggleEditMode());
+                document.addEventListener("keydown", (event) => {
+                    const editingText = event.target && event.target.getAttribute("contenteditable") === "true";
+                    if ((event.key === "e" || event.key === "E") && !editingText) {
+                        this.toggleEditMode();
+                    }
+                    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s") {
+                        event.preventDefault();
+                        this.save();
+                    }
+                });
+
+                this.editables.forEach((element) => {
+                    element.addEventListener("input", () => this.save(false));
+                    element.addEventListener("blur", () => this.save(false));
+                });
+            }
+
+            toggleEditMode() {
+                this.isActive = !this.isActive;
+                document.body.classList.toggle("editing", this.isActive);
+                this.toggle.classList.toggle("active", this.isActive);
+                this.toggle.classList.add("show");
+                this.editables.forEach((element) => {
+                    element.setAttribute("contenteditable", this.isActive ? "true" : "false");
+                });
+                if (!this.isActive) {
+                    this.save();
+                }
+            }
+
+            restore() {
+                const saved = JSON.parse(localStorage.getItem(this.storageKey) || "{}");
+                this.editables.forEach((element) => {
+                    const id = element.dataset.editId;
+                    if (id && Object.prototype.hasOwnProperty.call(saved, id)) {
+                        element.innerHTML = saved[id];
+                    }
+                    element.setAttribute("contenteditable", "false");
+                });
+            }
+
+            save(showToast = true) {
+                const payload = {};
+                this.editables.forEach((element) => {
+                    payload[element.dataset.editId] = element.innerHTML;
+                });
+                localStorage.setItem(this.storageKey, JSON.stringify(payload));
+                if (showToast) {
+                    this.toast.classList.add("show");
+                    setTimeout(() => this.toast.classList.remove("show"), 980);
+                }
+            }
+        }
+
+        /* === EDIT HOTZONE === */
+        const presentation = new SlidePresentation();
+        const editor = new InlineEditor();
+        const hotzone = document.querySelector(".edit-hotzone");
+        const editToggle = document.getElementById("editToggle");
+        let hideTimeout = null;
+
+        hotzone.addEventListener("mouseenter", () => {
+            clearTimeout(hideTimeout);
+            editToggle.classList.add("show");
+        });
+
+        hotzone.addEventListener("mouseleave", () => {
+            hideTimeout = setTimeout(() => {
+                if (!editor.isActive) editToggle.classList.remove("show");
+            }, 400);
+        });
+
+        hotzone.addEventListener("click", () => editor.toggleEditMode());
+
+        editToggle.addEventListener("mouseenter", () => {
+            clearTimeout(hideTimeout);
+        });
+
+        editToggle.addEventListener("mouseleave", () => {
+            hideTimeout = setTimeout(() => {
+                if (!editor.isActive) editToggle.classList.remove("show");
+            }, 400);
+        });
+    </script>
+</body>
+</html>
