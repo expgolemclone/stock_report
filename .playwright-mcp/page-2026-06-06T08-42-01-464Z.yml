@@ -1,0 +1,36 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]: Portfolio Research
+    - heading "Stock Report" [level=1] [ref=e4]
+    - paragraph [ref=e5]: 銘柄レポート一覧
+  - separator [ref=e7]
+  - main [ref=e8]:
+    - link "5280 ヨシコン レジデンス事業・不動産開発・賃貸管理等 ›" [ref=e9] [cursor=pointer]:
+      - /url: assets/5280/5280.html
+      - generic [ref=e10]: "5280"
+      - generic [ref=e11]:
+        - heading "ヨシコン" [level=2] [ref=e12]
+        - paragraph [ref=e13]: レジデンス事業・不動産開発・賃貸管理等
+      - generic [ref=e14]: ›
+    - link "5956 トーソー カーテンレール・ブラインド等のインテリア製品 ›" [ref=e15] [cursor=pointer]:
+      - /url: viewer.html?ticker=5956
+      - generic [ref=e16]: "5956"
+      - generic [ref=e17]:
+        - heading "トーソー" [level=2] [ref=e18]
+        - paragraph [ref=e19]: カーテンレール・ブラインド等のインテリア製品
+      - generic [ref=e20]: ›
+    - link "7871 フクビ化学工業 住宅建材・CSE事業・精密事業 ›" [ref=e21] [cursor=pointer]:
+      - /url: viewer.html?ticker=7871
+      - generic [ref=e22]: "7871"
+      - generic [ref=e23]:
+        - heading "フクビ化学工業" [level=2] [ref=e24]
+        - paragraph [ref=e25]: 住宅建材・CSE事業・精密事業
+      - generic [ref=e26]: ›
+    - link "9872 北恵 住宅資材・住宅設備の専門商社 ›" [ref=e27] [cursor=pointer]:
+      - /url: viewer.html?ticker=9872
+      - generic [ref=e28]: "9872"
+      - generic [ref=e29]:
+        - heading "北恵" [level=2] [ref=e30]
+        - paragraph [ref=e31]: 住宅資材・住宅設備の専門商社
+      - generic [ref=e32]: ›
+  - contentinfo [ref=e33]: © 2026 Stock Report

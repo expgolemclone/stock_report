@@ -1,0 +1,24 @@
+- generic [active] [ref=e1]:
+  - main [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]: "5280"
+      - generic [ref=e6]:
+        - generic [ref=e7]:
+          - generic [ref=e8]: "# ヨシコン (5280)"
+          - heading "ヨシコン (5280)" [level=1] [ref=e9]:
+            - text: ヨシコン
+            - text: (5280)
+          - paragraph [ref=e10]: 前提株価:2152円
+        - list [ref=e11]:
+          - listitem [ref=e12]: 事業内容
+          - listitem [ref=e13]: 指標
+          - listitem [ref=e14]: 周辺情報利用法
+          - listitem [ref=e15]: 新たな投資アイデア
+      - generic [ref=e16]: 5280 / ヨシコン
+  - generic "slide controls" [ref=e17]:
+    - button "‹" [ref=e18] [cursor=pointer]
+    - generic [ref=e19]: 01 / 09
+    - button "›" [ref=e22] [cursor=pointer]
+  - generic "Edit mode" [ref=e23] [cursor=pointer]
+  - button "E"
+  - generic: SAVED
